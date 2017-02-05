@@ -9,16 +9,90 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
+var todo_service_1 = require('../services/todo.service');
 var TodosComponent = (function () {
-    function TodosComponent() {
+    function TodosComponent(_todoService) {
+        this._todoService = _todoService;
     }
+    TodosComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.todos = [];
+        this._todoService.getTodos()
+            .subscribe(function (todos) {
+            _this.todos = todos;
+        });
+    };
+    TodosComponent.prototype.addTodo = function (event, todoText) {
+        var _this = this;
+        var result;
+        var newTodo = {
+            "text": todoText.value,
+            "isCompleted": false
+        };
+        result = this._todoService.saveTodo(newTodo);
+        result.subscribe(function (x) {
+            _this.todos.push(newTodo);
+            todoText.value = "";
+        });
+    };
+    TodosComponent.prototype.updateStatus = function (todo) {
+        var _todo = {
+            _id: todo._id,
+            text: todo.text,
+            isCompleted: !todo.isCompleted
+        };
+        this._todoService.updateTodo(_todo).subscribe(function (data) {
+            todo.isCompleted = !todo.isCompleted;
+        });
+    };
+    TodosComponent.prototype.getStatus = function (todo) {
+        if (todo.isCompleted) {
+            return "line-through";
+        }
+        else {
+            return "none";
+        }
+    };
+    TodosComponent.prototype.setEditState = function (todo, state) {
+        if (state) {
+            todo.isEditMode = state;
+        }
+        else {
+            delete todo.isEditMode;
+        }
+    };
+    TodosComponent.prototype.updateTodoText = function (event, todo) {
+        var _this = this;
+        if (event.which === 13) {
+            todo.text = event.target.value;
+            var _todo = {
+                _id: todo._id,
+                text: todo.text,
+                isCompleted: todo.isCompleted
+            };
+            this._todoService.updateTodo(_todo).subscribe(function (data) {
+                _this.setEditState(todo, false);
+            });
+        }
+    };
+    TodosComponent.prototype.deleteTodo = function (todo) {
+        var _this = this;
+        var result;
+        result = this._todoService.deleteTodo(todo._id);
+        result.subscribe(function (data) {
+            _this.todos = _this.todos.filter(function (el) {
+                return el._id !== todo._id;
+            });
+        });
+    };
     TodosComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
             selector: 'todos',
             templateUrl: "todos.component.html",
+            providers: [todo_service_1.TodoService]
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [todo_service_1.TodoService])
     ], TodosComponent);
     return TodosComponent;
 }());

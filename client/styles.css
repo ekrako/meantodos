@@ -1,3 +1,9 @@
 .navbar {
     margin-bottom: 0;
 }
+.todo-item{
+    margin-bottom: 10px;
+}
+.todo-btn{
+    margin-left: 3px;
+}
